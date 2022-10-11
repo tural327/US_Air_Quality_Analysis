@@ -34,6 +34,62 @@ Most clean and the most unclean state of usa
   2. Train data - I will use for training use for my model 
   3. Train data - I will use for training use for my model 
   
-    ![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/train_test_split.png)
+  ![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/train_test_split.png)
     
-   Next lets visualise data for finding seasonal or not 
+   Next lets visualise data and test by using adfuller_test for finding seasonal or not 
+   
+  ![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/seasonal_decompose.png)
+  
+  and our P value not less than 0.05 so our dataset is not non-stationary
+  
+  For finind my SARIMA parametrs I did hyperparameter tuning so:
+  
+  ```python
+  p = range(0,4)
+q = range(0,4)
+d = range(0,2)
+P = range(0,4)
+Q = range(0,4)
+D = range(0,2)
+pdqPQD_list  = list(itertools.product(p,q,d,P,Q,D))
+
+warnings.filterwarnings('ignore')
+
+rsme = []
+order = []
+
+for pqdPQD in tqdm.tqdm(pdqPQD_list):
+    try:
+        a = pqdPQD[:3]
+        b = list(pqdPQD[3:])
+        b.append(12)
+        b = tuple(b)
+        model = sm.tsa.statespace.SARIMAX(train_data['my_val'],order=a,seasonal_order=b).fit()
+        pred = model.predict(start=90,end=110,dynamic=True)
+        y_true = train_data['my_val'][90:111]
+        eror = np.sqrt(mean_squared_error(y_true,pred))
+        order.append(pqdPQD)
+        rsme.append(eror)
+    except:
+        print("something wrong with parametr of {}".format(pqdPQD))
+ ```
+
+So as result I got : <br>
+rsme	            order <br>
+3.181601	(1, 0, 0, 1, 0, 1) <br>
+3.189619	(3, 0, 0, 1, 0, 1) <br>
+3.208493	(1, 0, 1, 1, 0, 1) <br>
+
+so order of (1,0,0,1,0,1) I got minimum mean sqr error so in my model I will use that params and test it 
+```python
+model=sm.tsa.statespace.SARIMAX(train_data['my_val'],order=(1, 0, 0),seasonal_order=(1,0,1,12))
+results=model.fit()
+```
+
+![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/forecast_data.png)
+
+ It was good result!
+ 
+ # At the end i did forecasting mean value of AQI all over USA 
+ 
+ ![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/forecast_upcoming.png)
