@@ -32,7 +32,7 @@ Most clean and the most unclean state of usa
   Before building model I devided dataset 3 sections 
   1. old data - I will not gonna use for my model 
   2. Train data - I will use for training use for my model 
-  3. Train data - I will use for training use for my model 
+  3. Test data - I will use for testing use for my model 
   
   ![](https://github.com/tural327/US_Air_Quality_Analysis/blob/main/images/train_test_split.png)
     
